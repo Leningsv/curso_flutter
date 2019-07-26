@@ -4,6 +4,7 @@ import 'package:components_flutter/src/pages/avatar_page.dart';
 import 'package:components_flutter/src/pages/card_page.dart';
 import 'package:components_flutter/src/pages/home_page.dart';
 import 'package:components_flutter/src/pages/input_page.dart';
+import 'package:components_flutter/src/pages/slider_page.dart';
 import 'package:flutter/cupertino.dart';
 
 Map<String, WidgetBuilder> getApplicationRoutes() {
@@ -13,6 +14,7 @@ Map<String, WidgetBuilder> getApplicationRoutes() {
     'avatar': (BuildContext context) => new AvatarPage(),
     'card': (BuildContext context) => new CardPage(),
     'animatedContainer': (BuildContext context) => new AnimatedContainerPage(),
-    'inputs': (BuildContext context) => new InputPage()
+    'inputs': (BuildContext context) => new InputPage(),
+    'list': (BuildContext context) => new SliderPage()
   };
 }
