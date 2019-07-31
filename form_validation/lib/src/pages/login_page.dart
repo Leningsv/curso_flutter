@@ -94,17 +94,17 @@ class LoginPage extends StatelessWidget {
                   style: TextStyle(fontSize: 20.0),
                 ),
                 SizedBox(
-                  height: 60.0,
+                  height: 20.0,
                 ),
                 this._createEmail(loginBloc),
                 SizedBox(
-                  height: 30.0,
+                  height: 10.0,
                 ),
                 this._createPassword(loginBloc),
                 SizedBox(
-                  height: 30.0,
+                  height: 20.0,
                 ),
-                this._createButton()
+                this._createButton(loginBloc)
               ],
             ),
           ),
@@ -170,19 +170,24 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _createButton() {
-    return RaisedButton(
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 15.0),
-        child: Text('Ingresar'),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5.0),
-      ),
-      elevation: 0.0,
-      color: Colors.deepPurple,
-      textColor: Colors.white,
-      onPressed: () {},
+  Widget _createButton(LoginBloc loginBloc) {
+    return StreamBuilder(
+      stream: loginBloc.formValidStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return RaisedButton(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 15.0),
+            child: Text('Ingresar'),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          elevation: 0.0,
+          color: Colors.deepPurple,
+          textColor: Colors.white,
+          onPressed: snapshot.hasData ? () {} : null,
+        );
+      },
     );
   }
 }
