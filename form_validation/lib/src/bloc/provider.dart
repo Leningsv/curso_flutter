@@ -15,7 +15,7 @@ class Provider extends InheritedWidget {
   Provider._internal({Key key, Widget child}): super(key: key, child: child);
 
 //  Provider({Key key, Widget child}): super(key: key, child: child);
-  
+
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) {
     return true;
