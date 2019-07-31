@@ -22,6 +22,9 @@ class LoginBloc with Validators {
 
   Function(String) get changePassword => this._passwordController.sink.add;
 
+  String get email => this._emailController.value;
+  String get password => this._passwordController.value;
+
   dispose() {
     this._emailController?.close();
     this._passwordController?.close();

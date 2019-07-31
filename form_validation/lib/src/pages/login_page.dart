@@ -185,9 +185,15 @@ class LoginPage extends StatelessWidget {
           elevation: 0.0,
           color: Colors.deepPurple,
           textColor: Colors.white,
-          onPressed: snapshot.hasData ? () {} : null,
+          onPressed: snapshot.hasData ? () => this._login(loginBloc, context) : null,
         );
       },
     );
+  }
+
+  _login(LoginBloc loginBloc, BuildContext context) {
+    print('email: ${loginBloc.email}');
+    print('password:${loginBloc.password}');
+    Navigator.pushReplacementNamed(context, 'home');
   }
 }
