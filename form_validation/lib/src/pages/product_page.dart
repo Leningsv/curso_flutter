@@ -47,7 +47,7 @@ class ProductPage extends StatelessWidget {
 
   Widget _createPrice() {
     return TextFormField(
-      keyboardType: TextInputType.number,
+      keyboardType: TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
         labelText: 'Price'
       ),
