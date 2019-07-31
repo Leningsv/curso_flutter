@@ -1,20 +1,18 @@
+
 import 'dart:async';
 
-class LoginBloc {
+import 'package:form_validation/src/bloc/validators.dart';
+
+class LoginBloc with Validators {
   final _emailController = StreamController<String>.broadcast();
   final _passwordController = StreamController<String>.broadcast();
 
-  get emailController => _emailController.stream;
 
-  set emailController(value) {
-    this._emailController.sink.add(value);
-  }
+  Stream<String> get emailStream => this._emailController.stream.transform(validateEmail);
+  Stream<String> get passwordStream => this._passwordController.stream.transform(validatePassword);
 
-  get passwordController => _passwordController.stream;
-
-  set passwordController(value) {
-    this._passwordController.sink.add(value);
-  }
+  Function(String) get changeEmail => this._emailController.sink.add;
+  Function(String) get changePassword => this._passwordController.sink.add;
 
   dispose() {
     this._emailController?.close();
