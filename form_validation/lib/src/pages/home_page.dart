@@ -6,6 +6,7 @@ import 'package:form_validation/src/providers/product_provider.dart';
 
 class HomePage extends StatelessWidget {
   final _productProvider = new ProductProvider();
+
   @override
   Widget build(BuildContext context) {
     final loginBloc = Provider.of(context);
@@ -32,8 +33,9 @@ class HomePage extends StatelessWidget {
   Widget _getProducts() {
     return FutureBuilder(
       future: this._productProvider.getProducts(),
-      builder: (BuildContext context, AsyncSnapshot<List<ProductModel>> snapshot){
-        if(!snapshot.hasData){
+      builder:
+          (BuildContext context, AsyncSnapshot<List<ProductModel>> snapshot) {
+        if (!snapshot.hasData) {
           return Container();
         }
         final products = snapshot.data;
@@ -49,18 +51,33 @@ class HomePage extends StatelessWidget {
 
   Widget _createItem(BuildContext context, ProductModel product) {
     return Dismissible(
-      key: UniqueKey(),
-      background: Container(
-        color: Colors.deepOrangeAccent,
-      ),
-      onDismissed: (direction) {
-        this._productProvider.deleteProduct(product.id);
-      },
-      child: ListTile(
-        title: Text(product.title),
-        subtitle: Text(product.id),
-        onTap: () => Navigator.pushNamed(context, 'product', arguments: product),
-      ),
-    );
+        key: UniqueKey(),
+        background: Container(
+          color: Colors.deepOrangeAccent,
+        ),
+        onDismissed: (direction) {
+          this._productProvider.deleteProduct(product.id);
+        },
+        child: Card(
+          child: Column(
+            children: <Widget>[
+              product.urlPicture == null
+                  ? Image(image: AssetImage('assets/no-image.png'))
+                  : FadeInImage(
+                      image: NetworkImage(product.urlPicture),
+                      placeholder: AssetImage('assets/jar-loading.gif'),
+                      height: 300.0,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+              ListTile(
+                title: Text(product.title),
+                subtitle: Text(product.id),
+                onTap: () =>
+                    Navigator.pushNamed(context, 'product', arguments: product),
+              ),
+            ],
+          ),
+        ));
   }
 }

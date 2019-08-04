@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:form_validation/src/models/product_model.dart';
 import 'package:form_validation/src/providers/product_provider.dart';
 import 'package:form_validation/src/utils/validators.dart' as utils;
+import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProductPage extends StatefulWidget {
   @override
@@ -16,6 +20,7 @@ class _ProductPageState extends State {
   final _productProvider = new ProductProvider();
   ProductModel product = new ProductModel();
   bool _isSaved = false;
+  File _photo;
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +35,15 @@ class _ProductPageState extends State {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.photo_size_select_actual),
-            onPressed: () {},
+            onPressed: () {
+              this._selectPhoto();
+            },
           ),
           IconButton(
             icon: Icon(Icons.camera_alt),
-            onPressed: () {},
+            onPressed: () {
+              this._takePhoto();
+            },
           )
         ],
       ),
@@ -45,10 +54,11 @@ class _ProductPageState extends State {
             key: this.formKey,
             child: Column(
               children: <Widget>[
+                this._showPhoto(),
                 this._createName(),
                 this._createPrice(),
                 this._createIsAvailability(),
-                this._createButton(),
+                this._createButton(context),
               ],
             ),
           ),
@@ -91,13 +101,15 @@ class _ProductPageState extends State {
     );
   }
 
-  Widget _createButton() {
+  Widget _createButton(BuildContext context) {
     return RaisedButton.icon(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
         color: Colors.deepPurple,
         textColor: Colors.white,
-        onPressed: this._isSaved? null : this._submit,
+        onPressed: this._isSaved? null : () {
+          this._submit(context);
+        },
         icon: Icon(Icons.save),
         label: Text('Save'));
   }
@@ -115,7 +127,7 @@ class _ProductPageState extends State {
     );
   }
 
-  void _submit() {
+  _submit(BuildContext context) async{
     if(!formKey.currentState.validate()) {
       return;
     }
@@ -123,19 +135,56 @@ class _ProductPageState extends State {
     setState(() {
       this._isSaved = true;
     });
+    if(this._photo != null){
+      product.urlPicture = await this._productProvider.uploadImage(this._photo);
+    }
     if(product.id == null){
       this._productProvider.createProduct(product);
     } else{
       this._productProvider.updateProduct(product);
     }
     this.showSnackbar('Registro guardado');
+    Navigator.pop(context);
   }
 
   void showSnackbar(String message) {
     final snackbar = SnackBar(
-      content: Text('mensage'),
+      content: Text(message),
       duration: Duration(milliseconds: 1500),
     );
     scaffoldKey.currentState.showSnackBar(snackbar);
+  }
+
+  Widget _showPhoto() {
+    if(this.product.urlPicture == null){
+      return Image(
+        image: AssetImage(this._photo ?.path ?? 'assets/no-image.png'),
+        height: 300,
+        fit: BoxFit.cover,
+      );
+    }
+    return FadeInImage(
+      image: NetworkImage(this.product.urlPicture),
+      placeholder: AssetImage('assets/jar-loafing.gif'),
+      height: 300.0,
+      fit: BoxFit.contain
+    );
+  }
+  void _selectPhoto()async {
+    this._processImage(ImageSource.gallery);
+  }
+
+  void _takePhoto()async {
+    this._processImage(ImageSource.camera);
+  }
+
+  void _processImage(ImageSource source) async {
+    this._photo = await ImagePicker.pickImage(source: source);
+    if(this._photo != null ){
+      product.urlPicture = null;
+    }
+    setState(() {
+
+    });
   }
 }
