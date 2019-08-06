@@ -8,6 +8,7 @@ import 'package:mime_type/mime_type.dart';
 
 class ProductProvider {
   final String _url = 'https://flutter-b53a3.firebaseio.com';
+
   Future<bool> createProduct(ProductModel product) async {
     final url = '${this._url}/products.json';
     final response = await http.post(url, body: productModelToJson(product));
@@ -20,8 +21,8 @@ class ProductProvider {
     final url = '${this._url}/products.json';
     final response = await http.get(url);
     final Map<String, dynamic> decodedData = json.decode(response.body);
-    final List<ProductModel> products= new List<ProductModel>();
-    if(decodedData == null) {
+    final List<ProductModel> products = new List<ProductModel>();
+    if (decodedData == null) {
       return products;
     }
     decodedData.forEach((id, product) {
@@ -46,17 +47,16 @@ class ProductProvider {
   }
 
   Future<String> uploadImage(File image) async {
-    final url = Uri.parse('https://api.cloudinary.com/v1_1/dvijttdkz/image/upload?upload_preset=qfjxzard');
+    final url = Uri.parse(
+        'https://api.cloudinary.com/v1_1/dvijttdkz/image/upload?upload_preset=qfjxzard');
     final mimeType = mime(image.path).split('/'); //image/jpeg
-    final imageUploadRequest = http.MultipartRequest(
-      'POST',
-      url
-    );
-    final file = await http.MultipartFile.fromPath('file', image.path, contentType: MediaType(mimeType[0], mimeType[1]));
+    final imageUploadRequest = http.MultipartRequest('POST', url);
+    final file = await http.MultipartFile.fromPath('file', image.path,
+        contentType: MediaType(mimeType[0], mimeType[1]));
     imageUploadRequest.files.add(file);
     final streamResponse = await imageUploadRequest.send();
     final response = await http.Response.fromStream(streamResponse);
-    if(response.statusCode != 200 && response.statusCode != 201){
+    if (response.statusCode != 200 && response.statusCode != 201) {
       print('Algo salio mal');
       print(response.body);
       return null;

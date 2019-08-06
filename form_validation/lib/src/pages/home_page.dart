@@ -1,21 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:form_validation/src/bloc/product_bloc.dart';
 import 'package:form_validation/src/bloc/provider.dart';
 import 'package:form_validation/src/models/product_model.dart';
-import 'package:form_validation/src/providers/product_provider.dart';
 
 class HomePage extends StatelessWidget {
-  final _productProvider = new ProductProvider();
-
   @override
   Widget build(BuildContext context) {
-    final loginBloc = Provider.of(context);
-
+    final productBloc = Provider.productBloc(context);
+    productBloc.loadProducts();
     return new Scaffold(
       appBar: AppBar(
         title: Text('Home page'),
       ),
-      body: this._getProducts(),
+      body: this._getProducts(productBloc),
       floatingActionButton: this._createButton(context),
     );
   }
@@ -30,18 +28,17 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _getProducts() {
-    return FutureBuilder(
-      future: this._productProvider.getProducts(),
-      builder:
-          (BuildContext context, AsyncSnapshot<List<ProductModel>> snapshot) {
+  Widget _getProducts(ProductBloc productBloc) {
+    return StreamBuilder(
+      stream: productBloc.productStream,
+      builder: (BuildContext context, AsyncSnapshot<List<ProductModel>> snapshot){
         if (!snapshot.hasData) {
           return Container();
         }
         final products = snapshot.data;
         return ListView.builder(
           itemBuilder: (context, index) {
-            return this._createItem(context, products[index]);
+            return this._createItem(context, products[index], productBloc);
           },
           itemCount: products.length,
         );
@@ -49,14 +46,14 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _createItem(BuildContext context, ProductModel product) {
+  Widget _createItem(BuildContext context, ProductModel product, ProductBloc productBloc) {
     return Dismissible(
         key: UniqueKey(),
         background: Container(
           color: Colors.deepOrangeAccent,
         ),
         onDismissed: (direction) {
-          this._productProvider.deleteProduct(product.id);
+          productBloc.deleteProduct(product.id);
         },
         child: Card(
           child: Column(

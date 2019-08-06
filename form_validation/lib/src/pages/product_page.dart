@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:form_validation/src/bloc/product_bloc.dart';
+import 'package:form_validation/src/bloc/provider.dart';
 import 'package:form_validation/src/models/product_model.dart';
-import 'package:form_validation/src/providers/product_provider.dart';
 import 'package:form_validation/src/utils/validators.dart' as utils;
-import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProductPage extends StatefulWidget {
@@ -14,18 +14,20 @@ class ProductPage extends StatefulWidget {
     return _ProductPageState();
   }
 }
+
 class _ProductPageState extends State {
   final formKey = GlobalKey<FormState>();
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final _productProvider = new ProductProvider();
+  ProductBloc _productBloc;
   ProductModel product = new ProductModel();
   bool _isSaved = false;
   File _photo;
 
   @override
   Widget build(BuildContext context) {
+    this._productBloc = Provider.productBloc(context);
     final ProductModel productData = ModalRoute.of(context).settings.arguments;
-    if(productData != null) {
+    if (productData != null) {
       product = productData;
     }
     return Scaffold(
@@ -72,7 +74,7 @@ class _ProductPageState extends State {
       initialValue: product.title,
       textCapitalization: TextCapitalization.sentences,
       decoration: InputDecoration(labelText: 'Product'),
-      onSaved: (value){
+      onSaved: (value) {
         product.title = value;
       },
       validator: (value) {
@@ -89,11 +91,11 @@ class _ProductPageState extends State {
       initialValue: product.value.toString(),
       keyboardType: TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(labelText: 'Price'),
-      onSaved: (value){
+      onSaved: (value) {
         product.value = double.parse(value);
       },
-      validator: (value){
-        if(!utils.isNumeric(value)) {
+      validator: (value) {
+        if (!utils.isNumeric(value)) {
           return 'Ingrese un valor numerico';
         }
         return null;
@@ -107,9 +109,11 @@ class _ProductPageState extends State {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
         color: Colors.deepPurple,
         textColor: Colors.white,
-        onPressed: this._isSaved? null : () {
-          this._submit(context);
-        },
+        onPressed: this._isSaved
+            ? null
+            : () {
+                this._submit(context);
+              },
         icon: Icon(Icons.save),
         label: Text('Save'));
   }
@@ -127,21 +131,21 @@ class _ProductPageState extends State {
     );
   }
 
-  _submit(BuildContext context) async{
-    if(!formKey.currentState.validate()) {
+  _submit(BuildContext context) async {
+    if (!formKey.currentState.validate()) {
       return;
     }
     formKey.currentState.save();
     setState(() {
       this._isSaved = true;
     });
-    if(this._photo != null){
-      product.urlPicture = await this._productProvider.uploadImage(this._photo);
+    if (this._photo != null) {
+      product.urlPicture = await this._productBloc.uploadImage(this._photo);
     }
-    if(product.id == null){
-      this._productProvider.createProduct(product);
-    } else{
-      this._productProvider.updateProduct(product);
+    if (product.id == null) {
+      this._productBloc.createProduct(product);
+    } else {
+      this._productBloc.updateProduct(product);
     }
     this.showSnackbar('Registro guardado');
     Navigator.pop(context);
@@ -156,35 +160,33 @@ class _ProductPageState extends State {
   }
 
   Widget _showPhoto() {
-    if(this.product.urlPicture == null){
+    if (this.product.urlPicture == null) {
       return Image(
-        image: AssetImage(this._photo ?.path ?? 'assets/no-image.png'),
+        image: AssetImage(this._photo?.path ?? 'assets/no-image.png'),
         height: 300,
         fit: BoxFit.cover,
       );
     }
     return FadeInImage(
-      image: NetworkImage(this.product.urlPicture),
-      placeholder: AssetImage('assets/jar-loafing.gif'),
-      height: 300.0,
-      fit: BoxFit.contain
-    );
+        image: NetworkImage(this.product.urlPicture),
+        placeholder: AssetImage('assets/jar-loafing.gif'),
+        height: 300.0,
+        fit: BoxFit.contain);
   }
-  void _selectPhoto()async {
+
+  void _selectPhoto() async {
     this._processImage(ImageSource.gallery);
   }
 
-  void _takePhoto()async {
+  void _takePhoto() async {
     this._processImage(ImageSource.camera);
   }
 
   void _processImage(ImageSource source) async {
     this._photo = await ImagePicker.pickImage(source: source);
-    if(this._photo != null ){
+    if (this._photo != null) {
       product.urlPicture = null;
     }
-    setState(() {
-
-    });
+    setState(() {});
   }
 }
